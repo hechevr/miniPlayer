@@ -1,0 +1,2 @@
+# miniPlayer
+Course project
