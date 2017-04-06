@@ -1,5 +1,7 @@
 #include "playWave.hpp"
 
+#pragma comment(lib, "ws2_32.lib")
+
 namespace miniPlayer {
 
 	mini::mini(char* filename, unsigned int BUFFERSIZE) {
@@ -7,6 +9,18 @@ namespace miniPlayer {
 		this->filename = new char[strlen(filename)];
 		strcpy(this->filename, filename);
 		initialize();
+	}
+
+	mini::mini(MMCKINFO &RI, MMCKINFO &FI, MMCKINFO &DI, WAVEFORMATEX &WF, unsigned int BUFFERSIZE){
+		this->BUFFERSIZE = BUFFERSIZE;
+		this->filename = "out.out";
+		this->RIFFInfo = RI;
+		this->FMTChunkInfo = FI;
+		this->DATAChunkInfo = DI;
+		this->waveFmt = WF;
+		this->dataSize = DATAChunkInfo.cksize;
+
+
 	}
 
 	void mini::initialize() {
@@ -151,4 +165,5 @@ namespace miniPlayer {
 	void mini::miniPlause() {
 		plause = 0;
 	}
+
 }

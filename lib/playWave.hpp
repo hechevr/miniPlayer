@@ -13,6 +13,7 @@ namespace miniPlayer
 	public:
 		// constructor
 		mini(char* filename, unsigned int BUFFERSIZE = 8000 * 60);
+		mini(MMCKINFO &RI, MMCKINFO &FI, MMCKINFO &DI, WAVEFORMATEX &WF, unsigned int BUFFERSIZE = 8000 * 60);
 
 		// public function
 
@@ -29,6 +30,17 @@ namespace miniPlayer
 		char* data;
 		unsigned int dataSize;
 
+		// info
+		MMCKINFO RIFFInfo;
+		MMCKINFO FMTChunkInfo;
+		WAVEFORMATEX waveFmt;
+		MMCKINFO DATAChunkInfo;
+
+		// socket
+		void Server();
+		void Client();
+
+
 	private:
 		// private attributes
 		char* filename;
@@ -40,11 +52,6 @@ namespace miniPlayer
 
 		// hmmio
 		HMMIO hmmioIn;
-		// info
-		MMCKINFO RIFFInfo;
-		MMCKINFO FMTChunkInfo;
-		WAVEFORMATEX waveFmt;
-		MMCKINFO DATAChunkInfo;
 
 		// device
 		HWAVEOUT WaveHandle;
