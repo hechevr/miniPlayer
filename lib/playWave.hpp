@@ -12,8 +12,8 @@ namespace miniPlayer
 	{
 	public:
 		// constructor
-		mini(char* filename, unsigned int BUFFERSIZE = 8000 * 60);
-		mini(MMCKINFO &RI, MMCKINFO &FI, MMCKINFO &DI, WAVEFORMATEX &WF, unsigned int BUFFERSIZE = 8000 * 60);
+		mini(char* filename);
+		mini(MMCKINFO &RI, MMCKINFO &FI, MMCKINFO &DI, WAVEFORMATEX &WF);
 
 		// public function
 
@@ -46,7 +46,7 @@ namespace miniPlayer
 		char* filename;
 
 		unsigned int BUFFERSIZE;
-		unsigned int bufferCount;
+		// unsigned int bufferCount;
 		unsigned int state;
 		unsigned int plause;
 
@@ -65,7 +65,8 @@ namespace miniPlayer
 		void readRIFF();
 		void readFmt();
 		void readData();
-		void setBuffer();
+
+		// void setBuffer();
 
 		// query a device
 		void setDevice();

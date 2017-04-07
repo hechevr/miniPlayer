@@ -2,6 +2,10 @@
 #include <fstream>
 #include "playWave.hpp"
 
+#include <tchar.h>
+#include <strsafe.h>
+
+
 namespace miniPlayer
 {
 	class miniServer
@@ -33,7 +37,7 @@ namespace miniPlayer
 	{
 	public:
 		// constructor
-		miniClient(char* address = "192.168.110.46");
+		miniClient(char* address = "192.168.110.54");
 
 		// close
 		void miniClose();
@@ -43,12 +47,19 @@ namespace miniPlayer
 
 		// sock
 		SOCKET conn_sock;
+
+		// buffer
+		char* buffer;
 		
 		// addr
 		struct sockaddr_in remote_addr;
 
 		// build Client
-		void miniReceive();
+		mini receiveFMT();
+
+		void receiveData(mini &myPlayer);
+
+		void receiveAndPlay(mini &myPlayer);
 
 	};
 

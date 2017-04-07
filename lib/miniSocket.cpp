@@ -6,8 +6,25 @@
 #pragma comment(lib, "ws2_32.lib")
 
 #define MY_PORT 8081
-#define SEND_BUFFER_SIZE 8000
-#define REC_BUFFER_SIZE 8000
+#define SEND_BUFFER_SIZE 1000
+#define REC_BUFFER_SIZE 1000
+
+struct package {
+	miniPlayer::mini player;
+	miniPlayer::miniClient* client;
+	int Flag;
+};
+DWORD WINAPI loadPlay(LPVOID lpParam) {
+	struct package* pack = (struct package*)lpParam;
+	if (pack->Flag == 0) {
+		pack->client->receiveData(pack->player);
+	}
+	else {
+		Sleep(3000);
+		pack->player.miniPlay();
+	}
+	return 0;
+}
 
 
 namespace miniPlayer
@@ -135,10 +152,10 @@ namespace miniPlayer
 		WSACleanup();
 
 	}
-	void miniClient::miniReceive() {
+	mini miniClient::receiveFMT() {
 
 		// receive RIFFInfo
-		char* buffer = new char[sizeof(MMCKINFO)];
+		buffer = new char[sizeof(MMCKINFO)];
 		unsigned int bytes_recvd = recv(conn_sock, buffer, sizeof(MMCKINFO), 0);
 		MMCKINFO RI;
 		memcpy(&RI, buffer, sizeof(MMCKINFO));
@@ -168,6 +185,11 @@ namespace miniPlayer
 
 		// create myPlayer using RI, FI, DI, WF
 		miniPlayer::mini myPlayer(RI, FI, DI, WF);
+		myPlayer.data = new char[myPlayer.dataSize];
+
+		// return Player without data
+		return myPlayer;
+
 
 		// receive data
 		buffer = new char[REC_BUFFER_SIZE];
@@ -186,8 +208,60 @@ namespace miniPlayer
 			}
 		}
 
+	}
+
+	void miniClient::receiveData(mini &myPlayer) {
+		buffer = new char[REC_BUFFER_SIZE];
+		printf("size: %ud\n", myPlayer.dataSize);
+
+		unsigned long bytes_recvd;
+		unsigned long index;
+		unsigned int invalid = 0;
+		for (index = 0; index < myPlayer.dataSize && invalid < 5000; index += REC_BUFFER_SIZE){
+			bytes_recvd = recv(conn_sock, buffer, sizeof(char)*REC_BUFFER_SIZE, 0);
+			while (bytes_recvd != REC_BUFFER_SIZE) {
+				bytes_recvd = recv(conn_sock, buffer, sizeof(char)*REC_BUFFER_SIZE, 0);
+				invalid++ ;
+				if (invalid >= 5000) {
+					invalid = 0;
+					break;
+				}
+			}
+			printf("received data: %ul\n", bytes_recvd);
+			for (int i = 0; i < REC_BUFFER_SIZE; i++){
+				myPlayer.data[i + index] = buffer[i];
+				if (i + index >= myPlayer.dataSize - 1) {
+					break;
+				}
+			}
+
+		}
+
 		miniClose();
-		myPlayer.miniPlay();
+	}
+
+	void miniClient::receiveAndPlay(mini &myPlayer) {
+		struct package *pack = (struct package*)malloc(sizeof(struct package) * 2);
+		pack[0].client = this;
+		pack[0].Flag = 0;
+		pack[0].player = myPlayer;
+
+		pack[1].client = this;
+		pack[1].Flag = 1;
+		pack[1].player = myPlayer;
+
+		DWORD dwThreadIdArray[2];
+		HANDLE hThreadArray[2];
+		for (int i = 0; i < 2; i++) {
+			hThreadArray[i] = CreateThread(
+				NULL,
+				0,
+				loadPlay,
+				&pack[i],
+				0,
+				&dwThreadIdArray[i]);
+		}
+		WaitForMultipleObjects(2, hThreadArray, TRUE, INFINITE);
 	}
 
 }
