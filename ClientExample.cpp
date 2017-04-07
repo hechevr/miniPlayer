@@ -13,8 +13,11 @@ int main() {
 	// set socket
 	miniPlayer::miniClient myClient;
 
-	// receive and play data
-	myClient.miniReceive();
+	// receive FMT
+	miniPlayer::mini myPlayer = myClient.receiveFMT();
+
+	// receive data
+	myClient.receiveAndPlay(myPlayer);
 
 
 	return 0;
