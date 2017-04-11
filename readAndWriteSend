@@ -1,0 +1,71 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <winsock.h>
+
+#pragma comment(lib, "ws2_32.lib")
+
+#define SEND_BUFFER_SIZE 1000
+
+int main(int argc, char* argv[]) {
+	FILE* file = fopen(argv[1], "rb");
+
+	// obtain the file size
+	fseek(file, 0, SEEK_END);
+	unsigned long size = ftell(file);
+	rewind(file);
+
+	// alocate memory to contain the whole file
+	char* buffer = new char[size];
+
+	size_t result = fread(buffer, 1, size, file);
+	if (result != size) {
+		printf("doesn't read the whole file\n");
+	}
+
+	// create wsa
+	WSADATA wsaData;
+	WSAStartup(MAKEWORD(2, 1), &wsaData);
+	// create socket
+	SOCKET listen_sock;
+	SOCKET new_sock;
+
+	listen_sock = socket(AF_INET, SOCK_STREAM, 0);
+	printf("set socket\n");
+
+	struct sockaddr_in my_addr;
+	my_addr.sin_family = AF_INET;
+	my_addr.sin_port = htons(8081);
+	my_addr.sin_addr.s_addr = INADDR_ANY;
+
+	bind(listen_sock, (struct sockaddr*)&my_addr, sizeof(struct sockaddr));
+	printf("bind successfully\n");
+
+	listen(listen_sock, SOMAXCONN);
+	new_sock = accept(listen_sock, NULL, NULL);
+
+	// send size
+	char* sizebuff = new char[sizeof(unsigned long)];
+	// memcpy(sizebuff, &size, sizeof(unsigned long));
+	memcpy(sizebuff, &size, sizeof(unsigned long));
+	for (int i = 0; i < sizeof(unsigned long)+1; i++) {
+		printf("%d\n", sizebuff[i]);
+	}
+	printf("size: %ul\n", size);
+	send(new_sock, sizebuff, sizeof(buffer), 0);
+	
+	// send data
+	unsigned long index = 0;
+	for (index = 0; index < size; index += SEND_BUFFER_SIZE) {
+		send(new_sock, (char*)&buffer[index], sizeof(char)*SEND_BUFFER_SIZE, 0);
+		//printf("send %ul\n", sizeof(char)*SEND_BUFFER_SIZE);
+		for (int j = 0; j < SEND_BUFFER_SIZE; j++) {
+			// printf("%d\n", buffer[index + j]);
+		}
+	}
+	printf("total: %ul\n", index);
+	closesocket(new_sock);
+	closesocket(listen_sock);
+	WSACleanup();
+	return 1;
+}
