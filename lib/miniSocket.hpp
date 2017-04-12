@@ -31,6 +31,9 @@ namespace miniPlayer
 		// build Server
 		void miniSend(mini &player);
 
+		void miniSendMSG(char* message);
+		char* miniReceiveMSG();
+
 	};
 
 	class miniClient
@@ -60,6 +63,9 @@ namespace miniPlayer
 		void receiveData(mini &myPlayer);
 
 		void receiveAndPlay(mini &myPlayer);
+
+		void miniSendMSG(char* message);
+		char*  miniReceiveMSG();
 
 	};
 

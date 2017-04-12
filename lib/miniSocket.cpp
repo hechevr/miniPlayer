@@ -61,6 +61,9 @@ namespace miniPlayer
 
 		std::cout << "Wait for connection" << std::endl;
 
+		listen(listen_sock, SOMAXCONN);
+		new_sock = accept(listen_sock, NULL, NULL);
+
 	}
 
 	void miniServer::miniClose() {
@@ -73,8 +76,6 @@ namespace miniPlayer
 
 	void miniServer::miniSend(mini &player) {
 
-		listen(listen_sock, SOMAXCONN);
-		new_sock = accept(listen_sock, NULL, NULL);
 
 		// send RIFFInfo
 		char* buffer = new char[sizeof(MMCKINFO)];
@@ -114,7 +115,26 @@ namespace miniPlayer
 			printf("send %ul\n", sizeof(char)*SEND_BUFFER_SIZE);
 		}
 
-		miniClose();
+	}
+
+	void miniServer::miniSendMSG(char* message) {
+		
+	
+		char* buffer = new char[50];
+		for (int i = 0; i < strlen(message) + 1; i++) {
+			buffer[i] = message[i];
+		}
+		send(new_sock, (char*)buffer, sizeof(char) * 50, 0);
+
+	}
+
+	char* miniServer::miniReceiveMSG() {
+
+
+		char *buffer = new char[50];
+		unsigned int bytes_recvd = recv(new_sock, buffer, sizeof(char)*50, 0);
+		printf("%d\n", bytes_recvd);
+		return buffer;
 	}
 
 	miniClient::miniClient(char* address) {
@@ -237,7 +257,6 @@ namespace miniPlayer
 
 		}
 
-		miniClose();
 	}
 
 	void miniClient::receiveAndPlay(mini &myPlayer) {
@@ -264,4 +283,20 @@ namespace miniPlayer
 		WaitForMultipleObjects(2, hThreadArray, TRUE, INFINITE);
 	}
 
+	void miniClient::miniSendMSG(char* message) {
+
+		char* buffer = new char[50];
+		for (int i = 0; i < strlen(message) + 1; i++) {
+			buffer[i] = message[i];
+		}
+		send(conn_sock, (char*)buffer, sizeof(char)* 50, 0);
+
+	}
+
+	char* miniClient::miniReceiveMSG() {
+
+		char *buffer = new char[50];
+		unsigned int bytes_recvd = recv(conn_sock, buffer, sizeof(char)* 50, 0);
+		return buffer;
+	}
 }
