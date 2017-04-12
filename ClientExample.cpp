@@ -11,14 +11,19 @@ int main() {
 	// client side
 	
 	// set socket
-	miniPlayer::miniClient myClient;
+	miniPlayer::miniClient myClient("192.168.110.78");
 
-	// receive FMT
-	miniPlayer::mini myPlayer = myClient.receiveFMT();
+	// send
+	myClient.miniSendMSG("Hello");
+	printf("send: ");
 
-	// receive data
-	myClient.receiveAndPlay(myPlayer);
-
+	
+	// receive
+	char *message = new char[50];
+	message = myClient.miniReceiveMSG();
+	printf("%s\n", message);
+	
+	myClient.miniClose();
 
 	return 0;
 }

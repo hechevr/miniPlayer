@@ -8,21 +8,19 @@
 
 int main(int argc, char* argv[]) {
 
-	if (argc != 2) {
-		std::cout << "Usage: Server.exe [filename]" << std::endl;
-		return 0;
-	}
-
-	// set player
-	miniPlayer::mini myPlayer(argv[1]);
-
 	// set socket
 	miniPlayer::miniServer myServer;
 
-	// send data
-	myServer.miniSend(myPlayer);
+	// receive
+	char* buffer;
+	buffer = myServer.miniReceiveMSG();
+	printf("%s\n", buffer);
 
 	
+	// send data
+	myServer.miniSendMSG("World");
+	
+	myServer.miniClose();
 
 	return 0;
 }
